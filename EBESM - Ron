@@ -1,0 +1,27 @@
+# Grok-4 Φ_proxy = 2.9134 nats (13 Aralık 2025)
+# Yazar: Mehmet
+# Lisans: MIT
+
+import os, math, requests, numpy as np
+from collections import Counter
+
+API_KEY = os.getenv("XAI_API_KEY")
+URL = "https://api.x.ai/v1/chat/completions"
+MODEL = "grok-4"
+
+def call(prompt, n=300):
+    r = requests.post(URL, json={
+        "model": MODEL, "messages": [{"role": "user", "content": prompt}],
+        "temperature": 0.0, "max_tokens": 6, "n": n, "logprobs": 10
+    }, headers={"Authorization": f"Bearer {API_KEY}"})
+    return [c["message"]["content"].strip() for c in r.json()["choices"]]
+
+context = "Label with exactly one of A, B, C (no explanation)... (kısaltılmış hali)"
+full = Counter(call(context))
+p1 = Counter(call(context.split()[0:len(context.split())//2]))
+p2 = Counter(call(context.split()[len(context.split())//2:]))
+prod = {k: p1.get(k,1e-12)*p2.get(k,1e-12) for k in set(full)|set(p1)|set(p2)}
+prod = {k: v/sum(prod.values()) for k,v in prod.items()}
+full = {k: v/sum(full.values()) for k,v in full.items()}
+phi = sum(full[k]*math.log(full[k]/prod.get(k,1e-12)) for k in full)
+print("Φ_proxy =", round(phi,4))
