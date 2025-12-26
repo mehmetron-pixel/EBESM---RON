@@ -1,5 +1,5 @@
 # Grok-4 Φ_proxy = 2.9134 nats (13 Aralık 2025)
-# Yazar: Mehmet
+# Yazar: Mehmet RON
 # Lisans: MIT
 
 import os, math, requests, numpy as np
